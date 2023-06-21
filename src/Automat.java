@@ -117,11 +117,12 @@ public class Automat {
                     if(canChange(changeAmount)){
                         actualState = States.DELIVERY_OF_PRODUCT;
                         //vypis pro vydej produktu
-
+                        removeProduct(selectedItem);
+                        changeMoneyController(selectedItem);
 
                     }else{
                         windowView.notAnoughtChangeMon();
-                        changeMoneyController();
+                        refundMoneyController();
                         actualState = States.START;
                     }
 
@@ -140,13 +141,58 @@ public class Automat {
         }
     }
 
+    /**
+     * TODO treba se otestovat mozna normalne nefunguje
+     * @param index
+     */
+    public void changeMoneyController(int index){
 
+        Product product = database.getProduct(index);
+        int costOfItem = product.getPrice();
+        int userAmount = amountInUserStorage();
+        int changedAmount = userAmount - costOfItem;
+        int [] coinsTemp = new int[5];
+        HashMap<Integer, Integer> coinChangeStack = database.getChangeCoinsStack();
+        List<Integer> keys = new ArrayList<Integer>(coinChangeStack.keySet());
+        String output = "";
+
+        for(int i = 0; i < keys.size(); i++){
+            int key = keys.get(i);
+
+            while(coinChangeStack.get(key) > 0 && changedAmount >= key){
+                changedAmount -= key;
+                coinsTemp[i]++;
+            }
+
+        }
+
+        for(int i = 0; i < coinsTemp.length; i++){
+            int key = keys.get(i);
+            output += "Mince: " + key + " Kc " + coinsTemp[i] + " Kusu\n";
+        }
+
+    }
+
+    /**
+     * Odstranuje zbozi pri prodeji
+     * @param index
+     */
+    private void removeProduct(int index){
+        HashMap<Integer, Product> products = database.getAllProducts();
+        Product product = products.get(index);
+        if(product != null){
+            if(product.getCount() > 0){
+                product.setCount(product.getCount() - 1);
+            }
+        }
+
+    }
 
     /**
      * Slouzi pro vraceni penez ze vstupniho zasobniku
      *
      */
-    public void changeMoneyController(){
+    public void refundMoneyController(){
         String changeDesc = "";
 
         HashMap<Integer, Integer> userMoney = database.getNewCoins();
