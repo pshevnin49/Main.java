@@ -1,0 +1,10 @@
+public enum States {
+
+    START,
+    WALLET,
+    GOOD_IS_SELECTED,
+    CHANGE_RETURN_ERR,
+    CHANGE_RETURN_PROPER,
+    DELIVERY_OF_PRODUCT;
+
+}
