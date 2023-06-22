@@ -2,11 +2,19 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 
+/**
+ * Trida reprezentuje prodejici automat, tato trida
+ * je hlavni ridici tridou cele aplikace
+ */
 public class Automat {
 
+    /**Atribut tridy windowsView, slouzi pro vypisy na obrazovku*/
     private WindowView windowView;
+    /**Atribut tridy Model, slouzi pro komunikace s datama aplikace*/
     private Model database;
+    /**Reprezentuje aktualni stav automatu pomoci Enum States*/
     private States actualState;
+    /**Aktualne vybrane zbozi*/
     private int selectedItem;
     private String[] productsNames = {"Bageta", "Tycinka Snikers", "Tycinka Kitkat", "Tycinka Knopers", "Napoj Pepsi"};
     private int [] productPrices = {55, 25, 25, 25, 20};
@@ -117,8 +125,8 @@ public class Automat {
         String output = "";
 
         for(int i = 0; i < keys.size(); i++){
-            output += i + " " + products.get(keys.get(i)).getName() + " Pocet:" + products.get(keys.get(i)).getCount() +
-                    " Kusu, Cena:" + products.get(keys.get(i)).getPrice() + "Kc \n";
+            output += i + " " + products.get(keys.get(i)).getName() + " Pocet: " + products.get(keys.get(i)).getCount() +
+                    "X, Cena:" + products.get(keys.get(i)).getPrice() + "Kc \n";
         }
         windowView.goodsInfoView(output);
     }
@@ -153,15 +161,27 @@ public class Automat {
     }
 
     /**
-     * Servisni tlacitko pro obsluho automatu
+     * Servisni tlacitko pro obsluhu automatu, aktualizuje zbozi
+     * a vyprazdnuje hlavni zasobnik.
      */
     private void serviceButton(){
-        //windowView.serviceButtonView();
+
+        HashMap<Integer, Integer> allCoinsSt = database.getAllCoinsStack();
+        List<Integer> keys = new ArrayList<>(allCoinsSt.keySet());
+        String description = "";
+
+        for(int i = 0; i < keys.size();i++){
+            int key = keys.get(i);
+            int coinCount = allCoinsSt.get(key);
+            description += "Mince: " + key + " Kc " + coinCount + "X\n";
+        }
+        windowView.serviceButtonView(description);
         refillMachine();
     }
 
     /**
-     * Prodlouzeni s vybranym zbozim
+     * Prodlouzeni s vybranym zbozim, kontroluje zda je dostupne, zda je dostatek
+     * penez pro vraceni uzivateli
      */
     private void contWithGood(){
         int userAmount = amountInUserStorage();
@@ -178,6 +198,7 @@ public class Automat {
                         changeMoneyController(selectedItem);
                         windowView.startStateView();
                         actualState = States.START;
+                        selectedItem = -1;
                         monToAllMonStorage();
                     }else{
                         windowView.notAnoughtChangeMon();
@@ -203,7 +224,7 @@ public class Automat {
     }
 
     /**
-     * Slouzi pro pprelozeni minci ze vstupniho
+     * Slouzi pro prelozeni minci ze vstupniho
      * zasobniku do velkeho zasobniku
      */
     public void monToAllMonStorage(){
@@ -286,11 +307,12 @@ public class Automat {
 
         HashMap<Integer, Integer> userMoney = database.getNewCoins();
         List<Integer> keys = new ArrayList<Integer>(userMoney.keySet());
+        selectedItem = -1;
 
         for(int i = 0; i < keys.size(); i++){
             int key = keys.get(i);
             int coinCount = userMoney.get(key);
-            changeDesc += "Mince: " + key + " Kc " + coinCount + " Kusu\n";
+            changeDesc += "Mince: " + key + " Kc " + coinCount + "X\n";
             userMoney.put(key, 0);
         }
         windowView.coinReturn(changeDesc);

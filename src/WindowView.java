@@ -87,12 +87,17 @@ public class WindowView {
         System.out.println("Vydano zbozi: " + goodsName);
     }
 
+    /**
+     * Vypis v pripade zadani spatneho prikazu
+     */
     public void badCommand(){
-
         System.out.println("Spatny format prikazu");
         System.out.println("Prikaz musi byt ve formatu: A-<_> ");
     }
 
+    /**
+     * Vypis v pripade zadani spatne castky
+     */
     public void badAmount(){
         System.out.println("Spatny format castky, vyberte prosim jednu z dostupnych minci: (1, 2, 5, 10, 20)");
     }
@@ -105,8 +110,19 @@ public class WindowView {
         System.out.println("Omlouvame se, ale automat nema penize pro vraceni");
     }
 
+    /**
+     * Vypis po stisknuti servisniho tlacitka
+     * @param allCoins
+     */
     public void serviceButtonView(String allCoins){
         System.out.println("Stisknuto tlacitko SERVICE, zbozi je aktualizovano");
+        System.out.println("Ze hlavniho zasobniku jsou vylozene mince:");
+        if(allCoins.length() > 2){
+            System.out.println(allCoins);
+        }else {
+            System.out.println("Zadne mince");
+        }
+
     }
 
     /**

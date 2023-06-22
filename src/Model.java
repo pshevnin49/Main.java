@@ -1,20 +1,27 @@
 import java.util.HashMap;
 
 /**
- * Chrani vsechna potrebna data automatu
+ * Slouzi pro komunikace s datovymi struktury ktere chrani
+ * vsechna data aplikace
  */
 public class Model {
 
+    /**Mozne druhy minci (1, 2, 5, 10, 20)*/
     private HashMap<Integer, Coin> coins;
+    /**Hlavni zasobnik vsech minci*/
     private HashMap<Integer, Integer> allCoinsStack;
+    /**Minci vlozene uzivatelem hned*/
     private HashMap<Integer, Integer> newCoinsStack;
+    /**Tridene mince pro vraceni uzivateli*/
     private HashMap<Integer, Integer> changeCoinsStack;
+    /**Vsichni dostupne zbozi*/
     private HashMap<Integer, Product> allProducts;
+    /**Druhy nazvu zbozi*/
     private String[] productsNames = {"Bageta", "Tycinka Snikers", "Tycinka Kitkat", "Tycinka Knopers", "Napoj Pepsi"};
+    /**Ceny zbozi*/
     private int [] productPrices = {55, 25, 25, 25, 20};
 
     public Model(){
-
         coins = new HashMap<>();
         coins.put(1, Coin.JEDNA);
         coins.put(2, Coin.DVA);
@@ -40,7 +47,7 @@ public class Model {
     public void generateProducts(){
         allProducts = new HashMap<>();
         for(int i = 0; i < productsNames.length; i++){
-            allProducts.put(i, new Product(i, productsNames[i], 1, productPrices[i]));
+            allProducts.put(i, new Product(i, productsNames[i], 10, productPrices[i]));
         }
     }
 
@@ -54,11 +61,11 @@ public class Model {
         if(newCoinsStack.get(coin) != null){
             if(newCoinsStack.get(coin) != 0){
                 newCoinsStack.put(coin, newCoinsStack.get(coin) + 1);
+                return;
             }
         }
-        else{
-            newCoinsStack.put(coin, 1);
-        }
+
+        newCoinsStack.put(coin, 1);
     }
 
     /**
