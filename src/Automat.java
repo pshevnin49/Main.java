@@ -8,6 +8,8 @@ public class Automat {
     private Model database;
     private States actualState;
     private int selectedItem;
+    private String[] productsNames = {"Bageta", "Tycinka Snikers", "Tycinka Kitkat", "Tycinka Knopers", "Napoj Pepsi"};
+    private int [] productPrices = {55, 25, 25, 25, 20};
 
     /**
      * Konstruktor
@@ -23,6 +25,7 @@ public class Automat {
         actualState = States.START;
         windowView.startStateView();
         database.fillChangeCoinStack();
+        database.emptyAllCoinsStack();
         database.generateProducts();
         selectedItem = -1;
     }
@@ -32,7 +35,6 @@ public class Automat {
      * @param command
      */
     public void startStateController(String command){
-
         switch (command.charAt(2)){
             case 'M':
                 sumHandlingController(command);
@@ -44,24 +46,71 @@ public class Automat {
                 itemsInfo();
                 break;
             case 'S':
+                serviceButton();
                 break;
             case 'V':
+                stornoButton();
                 break;
+            default:
+                windowView.badCommand();
+                break;
+        }
+    }
 
+    /**
+     * Zpracovava vstup pro stav wallet
+     * @param command
+     */
+    public void walletStateController(String command){
+        switch (command.charAt(2)){
+            case 'M':
+                sumHandlingController(command);
+                break;
+            case 'Z':
+                productValueHandling(command);
+                break;
+            case 'I':
+                itemsInfo();
+                break;
+            case 'V':
+                stornoButton();
+                break;
+            default:
+                windowView.badCommand();
+                break;
         }
     }
 
     public void selectedGoodController(String command){
         switch (command.charAt(2)){
             case 'O':
+                contWithGood();
                 break;
             case 'V':
+                stornoButton();
+                break;
+            default:
+                windowView.badCommand();
                 break;
         }
+    }
+
+    /**
+     * Tlacitko pro vraceni do
+     * stavu start a vraceni penez
+     */
+    private void stornoButton(){
+
+        refundMoneyController();
+        actualState = States.START;
+        selectedItem = -1;
+        windowView.startStateView();
 
     }
 
-
+    /**
+     * Slouzi pro vypis informace o zbozi
+     */
     private void itemsInfo(){
         HashMap<Integer, Product> products = database.getAllProducts();
         List<Integer> keys = new ArrayList<Integer>(products.keySet());
@@ -87,7 +136,7 @@ public class Automat {
                 int indexNumber = Character.getNumericValue(index);
                 if(indexNumber <= 4){
 
-                    actualState = States.GOOD_IS_SELECTED;
+                    actualState = States.ITEM_IS_SELECTED;
                     windowView.goodIsSelected(database.getProduct(indexNumber).getName());
                     selectedItem = indexNumber;
 
@@ -104,22 +153,32 @@ public class Automat {
     }
 
     /**
+     * Servisni tlacitko pro obsluho automatu
+     */
+    private void serviceButton(){
+        //windowView.serviceButtonView();
+        refillMachine();
+    }
+
+    /**
      * Prodlouzeni s vybranym zbozim
      */
     private void contWithGood(){
         int userAmount = amountInUserStorage();
         if(selectedItem != -1){
-
             if(productAvailController(selectedItem)){
                 if(saleController(selectedItem)){
                     int changeAmount = userAmount - database.getAllProducts().get(selectedItem).getPrice();
 
                     if(canChange(changeAmount)){
-                        actualState = States.DELIVERY_OF_PRODUCT;
-                        //vypis pro vydej produktu
+                        actualState = States.DELIVERY_OF_ITEM;
+                        windowView.itemDeliveryState();
+                        windowView.issuanceOfGoods(database.getProduct(selectedItem).getName());
                         removeProduct(selectedItem);
                         changeMoneyController(selectedItem);
-
+                        windowView.startStateView();
+                        actualState = States.START;
+                        monToAllMonStorage();
                     }else{
                         windowView.notAnoughtChangeMon();
                         refundMoneyController();
@@ -138,11 +197,37 @@ public class Automat {
             }
         }else{
             actualState = States.START;
+            System.out.println("Error item is not selected ");
+        }
+        selectedItem = -1;
+    }
+
+    /**
+     * Slouzi pro pprelozeni minci ze vstupniho
+     * zasobniku do velkeho zasobniku
+     */
+    public void monToAllMonStorage(){
+
+        HashMap<Integer, Integer> userStorage = database.getNewCoins();
+        HashMap<Integer, Integer> allStorage = database.getAllCoinsStack();
+        List<Integer> keys = new ArrayList<>(userStorage.keySet());
+
+        for(int i = 0; i < keys.size(); i++){
+            int key = keys.get(i);
+            int coinCount = userStorage.get(key);
+
+            if(allStorage.get(key) != null){
+                allStorage.put(key, allStorage.get(key) + coinCount);
+
+            }else{
+                allStorage.put(key, coinCount);
+            }
+            userStorage.put(key, 0);
         }
     }
 
     /**
-     * TODO treba se otestovat mozna normalne nefunguje
+     * Vraci penize uzivateli po nakupu
      * @param index
      */
     public void changeMoneyController(int index){
@@ -152,25 +237,27 @@ public class Automat {
         int userAmount = amountInUserStorage();
         int changedAmount = userAmount - costOfItem;
         int [] coinsTemp = new int[5];
+
         HashMap<Integer, Integer> coinChangeStack = database.getChangeCoinsStack();
-        List<Integer> keys = new ArrayList<Integer>(coinChangeStack.keySet());
+        HashMap<Integer, Integer> allcoinsStack = database.getAllCoinsStack();
+
+        List<Integer> keys = new ArrayList<>(coinChangeStack.keySet());
         String output = "";
 
-        for(int i = 0; i < keys.size(); i++){
+        for(int i = keys.size()-1; i >= 0; i--){
             int key = keys.get(i);
 
             while(coinChangeStack.get(key) > 0 && changedAmount >= key){
                 changedAmount -= key;
                 coinsTemp[i]++;
             }
-
         }
 
         for(int i = 0; i < coinsTemp.length; i++){
             int key = keys.get(i);
-            output += "Mince: " + key + " Kc " + coinsTemp[i] + " Kusu\n";
+            output += "Mince: " + key + " Kc " + coinsTemp[i] + "X\n";
         }
-
+        windowView.coinReturn(output);
     }
 
     /**
@@ -193,6 +280,8 @@ public class Automat {
      *
      */
     public void refundMoneyController(){
+        actualState = States.CHANGE_RETURN_ERR;
+        windowView.changeFromUserStack();
         String changeDesc = "";
 
         HashMap<Integer, Integer> userMoney = database.getNewCoins();
@@ -223,6 +312,7 @@ public class Automat {
             while(changeCoins.get(key) > 0 && amount >= key){
                 amount -= key;
             }
+
         }
         return amount == 0;
     }
@@ -263,23 +353,30 @@ public class Automat {
      */
     private void sumHandlingController(String command){
 
-        if(command.length() == 5){
-            char sum = command.charAt(4);
-            if(Character.isDigit(sum)){
-                int sumNumber = Character.getNumericValue(sum);
+        if(command.length() == 5 || command.length() == 6){
+            String [] tempString = command.split("=");
 
-                if(coinCheck(sumNumber)){
+            if(tempString.length == 2){
+                String sumString = tempString[1];
+                if(isNumber(sumString)){
+                    int sumNumber = Integer.parseInt(sumString);
 
-                    database.addNewCoin(sumNumber);
-                    actualState = States.WALLET;
-                    windowView.walletState(Integer.toString(amountInUserStorage()));
+                    if(coinCheck(sumNumber)){
 
+                        database.addNewCoin(sumNumber);
+                        actualState = States.WALLET;
+                        windowView.walletState(Integer.toString(amountInUserStorage()));
+
+                    }else{
+                        windowView.badAmount();
+                    }
                 }else{
                     windowView.badAmount();
                 }
             }else{
-                windowView.badAmount();
+                windowView.badCommand();
             }
+
         }else{
 
             windowView.badCommand();
@@ -302,26 +399,26 @@ public class Automat {
         return false;
     }
 
-
     /**
      * Zpracovava uzivatelsky vstup
      * @param input
      */
     public void processInput(String input){
-        if(input.length() > 2 && input.length() < 6){
+        if(input.length() > 2 && input.length() <= 6){
             if(input.charAt(0) == 'A' && input.charAt(1) == '-'){
                 switch (actualState){
                     case START:
                         startStateController(input);
-                    case WALLET:
                         break;
-                    case GOOD_IS_SELECTED:
+                    case WALLET:
+                        walletStateController(input);
+                        break;
+                    case ITEM_IS_SELECTED:
+                        selectedGoodController(input);
                         break;
                     case CHANGE_RETURN_ERR:
                         break;
-                    case CHANGE_RETURN_PROPER:
-                        break;
-                    case DELIVERY_OF_PRODUCT:
+                    case DELIVERY_OF_ITEM:
                         break;
                 }
 
@@ -349,12 +446,25 @@ public class Automat {
         for(int i = 0; i < keys.size(); i++){
             int key = keys.get(i);
             int coinValue = usersMoney.get(key);
-
             amount += (key * coinValue);
-
         }
 
         return amount;
+    }
+
+    /**
+     * Kontroluje zda string je cislem
+     * @param number
+     * @return true pokud je cislem, false pokud ne
+     */
+    public boolean isNumber(String number){
+        try{
+            Integer.parseInt(number);
+            return true;
+
+        }catch (NumberFormatException e){
+            return false;
+        }
     }
 
 }

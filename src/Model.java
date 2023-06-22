@@ -30,6 +30,9 @@ public class Model {
         generateProducts();
     }
 
+    public void emptyAllCoinsStack(){
+        allCoinsStack = new HashMap<>();
+    }
 
     /**
      * Generuje vsichni zbozi pri restartu i pri plneni obsluhou
@@ -37,7 +40,7 @@ public class Model {
     public void generateProducts(){
         allProducts = new HashMap<>();
         for(int i = 0; i < productsNames.length; i++){
-            allProducts.put(i, new Product(i, productsNames[i], 10, productPrices[i]));
+            allProducts.put(i, new Product(i, productsNames[i], 1, productPrices[i]));
         }
     }
 
@@ -48,8 +51,10 @@ public class Model {
      */
     public void addNewCoin(int coin){
 
-        if(newCoinsStack.containsKey(coin)){
-            newCoinsStack.put(coin, newCoinsStack.get(coin) + 1);
+        if(newCoinsStack.get(coin) != null){
+            if(newCoinsStack.get(coin) != 0){
+                newCoinsStack.put(coin, newCoinsStack.get(coin) + 1);
+            }
         }
         else{
             newCoinsStack.put(coin, 1);
@@ -68,22 +73,6 @@ public class Model {
         changeCoinsStack.put(20, 10);
     }
 
-    /**
-     * Vklada mince do zasobniku novych minci
-     * @param coinEquivalent
-     */
-    public void addCoinToNew(int coinEquivalent){
-        if(newCoinsStack.containsKey(coinEquivalent)){
-            int oldValue = newCoinsStack.get(coinEquivalent);
-            newCoinsStack.put(coinEquivalent, oldValue + 1);
-        }else{
-            newCoinsStack.put(coinEquivalent, 1);
-        }
-    }
-
-    public void remOneProdPiece(int id){
-        allProducts.get(id).setCount(allProducts.get(id).getCount() - 1);
-    }
 
     public Product getProduct(int id){
         return allProducts.get(id);
@@ -94,11 +83,15 @@ public class Model {
     }
 
     public HashMap<Integer, Integer> getChangeCoinsStack(){
-        return allCoinsStack;
+        return changeCoinsStack;
     }
 
     public HashMap<Integer, Integer> getNewCoins(){
         return newCoinsStack;
+    }
+
+    public HashMap<Integer, Integer> getAllCoinsStack(){
+        return allCoinsStack;
     }
 
 
