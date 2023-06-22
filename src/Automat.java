@@ -143,10 +143,15 @@ public class Automat {
             if(Character.isDigit(index)){
                 int indexNumber = Character.getNumericValue(index);
                 if(indexNumber <= 4){
-
-                    actualState = States.ITEM_IS_SELECTED;
-                    windowView.goodIsSelected(database.getProduct(indexNumber).getName());
-                    selectedItem = indexNumber;
+                    if(productAvailController(selectedItem)){
+                        actualState = States.ITEM_IS_SELECTED;
+                        windowView.goodIsSelected(database.getProduct(indexNumber).getName());
+                        selectedItem = indexNumber;
+                    }else{
+                        windowView.productIsNotAvail();
+                        actualState = States.WALLET;
+                        windowView.walletState(Integer.toString(amountInUserStorage()));
+                    }
 
                 }else{
                     windowView.badProductIndex();
@@ -191,11 +196,14 @@ public class Automat {
                     int changeAmount = userAmount - database.getAllProducts().get(selectedItem).getPrice();
 
                     if(canChange(changeAmount)){
+                        actualState = States.CHANGE_MONEY;
+                        windowView.changeMoneyState();
+                        changeMoneyController(selectedItem);
                         actualState = States.DELIVERY_OF_ITEM;
                         windowView.itemDeliveryState();
                         windowView.issuanceOfGoods(database.getProduct(selectedItem).getName());
                         removeProduct(selectedItem);
-                        changeMoneyController(selectedItem);
+
                         windowView.startStateView();
                         actualState = States.START;
                         selectedItem = -1;
@@ -362,11 +370,12 @@ public class Automat {
     public boolean productAvailController(int index){
         HashMap<Integer, Product> products = database.getAllProducts();
 
-        if(products.get(index).getCount() > 0){
-            return true;
-        }else{
-            return false;
+        if(products.get(index) != null){
+            if(products.get(index).getCount() > 0){
+                return true;
+            }
         }
+        return false;
     }
 
     /**

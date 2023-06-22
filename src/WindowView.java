@@ -12,13 +12,13 @@ public class WindowView {
      */
     public void startStateView(){
         System.out.println();
-        System.out.println("Aktualni stav: start");
+        System.out.println("Aktualni stav: START");
         System.out.println("Dostupne aktivity:");
         System.out.println("A-M=N pro vlozeni mince, kde N je mena mince");
         System.out.println("A-Z=N pro vyber zbozi, kde N je index zbozi");
         System.out.println("A-I pro vypis info o dostupnem zbozi");
         System.out.println("A-S Servisni tlacitko pro naplneni automatu zbozim a odber minci");
-        System.out.println("A-V Tlacitko <STORNO>");
+        //System.out.println("A-V Tlacitko <STORNO>");
     }
 
     /**
@@ -28,7 +28,7 @@ public class WindowView {
      */
     public void goodIsSelected(String item){
         System.out.println("Je vybrano: " + item);
-        System.out.println("Aktualni stav: item is selected");
+        System.out.println("Aktualni stav: ITEM IS SELECTED");
         System.out.println("Dostupne aktivity:");
         System.out.println("A-O potvrdit vyber zbozi");
         System.out.println("A-V Tlacitko <STORNO>");
@@ -36,7 +36,7 @@ public class WindowView {
 
     public void walletState(String amount){
         System.out.println();
-        System.out.println("Aktualni stav: wallet");
+        System.out.println("Aktualni stav: WALLET");
         System.out.println("Jste vlozil " + amount + " Kc");
         System.out.println("Dostupne aktivity:");
         System.out.println("A-M=N pro vlozeni mince, kde N je mena mince");
@@ -71,12 +71,17 @@ public class WindowView {
 
     public void itemDeliveryState(){
         System.out.println();
-        System.out.println("Aktualni stav: delivery of item");
+        System.out.println("Aktualni stav: DELIVERY OF ITEM");
+    }
+
+    public void changeMoneyState(){
+        System.out.println();
+        System.out.println("Aktualni stav: CHANGE MONEY");
     }
 
     public void changeFromUserStack(){
         System.out.println();
-        System.out.println("Aktualni stav: money refund");
+        System.out.println("Aktualni stav: MONEY REFUND");
     }
 
     /**
