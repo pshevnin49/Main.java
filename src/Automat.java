@@ -143,11 +143,12 @@ public class Automat {
             if(Character.isDigit(index)){
                 int indexNumber = Character.getNumericValue(index);
                 if(indexNumber <= 4){
-                    if(productAvailController(selectedItem)){
+                    if(productAvailController(indexNumber)){
                         actualState = States.ITEM_IS_SELECTED;
                         windowView.goodIsSelected(database.getProduct(indexNumber).getName());
                         selectedItem = indexNumber;
                     }else{
+
                         windowView.productIsNotAvail();
                         actualState = States.WALLET;
                         windowView.walletState(Integer.toString(amountInUserStorage()));
@@ -185,8 +186,8 @@ public class Automat {
     }
 
     /**
-     * Prodlouzeni s vybranym zbozim, kontroluje zda je dostupne, zda je dostatek
-     * penez pro vraceni uzivateli
+     * Prodlouzeni s vybranym zbozim, pokud je dostatek
+     * penez pro vraceni uzivateli prodlouzi v nakupu
      */
     private void contWithGood(){
         int userAmount = amountInUserStorage();
@@ -209,6 +210,7 @@ public class Automat {
                         selectedItem = -1;
                         monToAllMonStorage();
                     }else{
+
                         windowView.notAnoughtChangeMon();
                         refundMoneyController();
                         actualState = States.START;
@@ -309,7 +311,7 @@ public class Automat {
      *
      */
     public void refundMoneyController(){
-        actualState = States.CHANGE_RETURN_ERR;
+        actualState = States.REFUND_MONEY;
         windowView.changeFromUserStack();
         String changeDesc = "";
 
@@ -356,7 +358,7 @@ public class Automat {
     public boolean saleController(int index){
         HashMap<Integer, Product> products = database.getAllProducts();
 
-        if(amountInUserStorage() > products.get(index).getPrice()){
+        if(amountInUserStorage() >= products.get(index).getPrice()){
             return true;
         }
         return false;
@@ -370,8 +372,10 @@ public class Automat {
     public boolean productAvailController(int index){
         HashMap<Integer, Product> products = database.getAllProducts();
 
-        if(products.get(index) != null){
+        if(products.containsKey(index)){
+
             if(products.get(index).getCount() > 0){
+
                 return true;
             }
         }
@@ -447,7 +451,7 @@ public class Automat {
                     case ITEM_IS_SELECTED:
                         selectedGoodController(input);
                         break;
-                    case CHANGE_RETURN_ERR:
+                    case REFUND_MONEY:
                         break;
                     case DELIVERY_OF_ITEM:
                         break;

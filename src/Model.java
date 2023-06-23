@@ -6,8 +6,6 @@ import java.util.HashMap;
  */
 public class Model {
 
-    /**Mozne druhy minci (1, 2, 5, 10, 20)*/
-    private HashMap<Integer, Coin> coins;
     /**Hlavni zasobnik vsech minci*/
     private HashMap<Integer, Integer> allCoinsStack;
     /**Minci vlozene uzivatelem hned*/
@@ -22,12 +20,6 @@ public class Model {
     private int [] productPrices = {55, 25, 25, 25, 20};
 
     public Model(){
-        coins = new HashMap<>();
-        coins.put(1, Coin.JEDNA);
-        coins.put(2, Coin.DVA);
-        coins.put(5, Coin.PET);
-        coins.put(10, Coin.DESET);
-        coins.put(20, Coin.DVACET);
 
         allCoinsStack = new HashMap<>();
         newCoinsStack = new HashMap<>();
